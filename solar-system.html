@@ -27,22 +27,17 @@
       init: function() {
         this.mass = 5.972; // 5.972e24 kg
         this.velocity = {
-          'x': 2.98,
+          'x': 30.29e-6,
           'y': 0,
           'z': 0
         }; // initial velocity
-        this.counter = 0;
+        // units: 1 unit here = 10 million kilometers. Earth & moon starts at perihelion.
+        this.logged = 0;
       },
       tick: function(time, timeDelta) {
-        if (this.counter >= 3) {
-          return;
-        }
-        console.log('counter' + this.counter);
-        
-        console.log("velocity:" + JSON.stringify(this.velocity));
-        var SUN_MASS = 1.989 * Math.pow(10, 6); // 1.989e30 kg
-        var HARDCODED_FACTOR_LOL = 10000; // what???
         // TODO: this is hardcoded assuming center of sun is at the origin.
+        var SUN_MASS = 1.989 * Math.pow(10, 6); // 1.989e30 kg
+        var GRAVITY_CONSTANT = 6.67e-11;
         var el = this.el;
         var position = el.getAttribute("position");
         // calculate new velocity
@@ -51,30 +46,25 @@
           'y': -position.y,
           'z': -position.z,
         }; // have to reverse vector because we want earth to sun not sun to earth
-        var accelerationMagnitude = SUN_MASS / Math.pow(getVectorMagnitude(earthToSunVector), 2);
+        var accelerationMagnitude = SUN_MASS / Math.pow(getVectorMagnitude(earthToSunVector), 2) * GRAVITY_CONSTANT;
         var acceleration = scaleVector(earthToSunVector, accelerationMagnitude);
         console.log("acceleration:" + JSON.stringify(acceleration));
-        console.log("timeDelta:" + JSON.stringify(timeDelta));
+        console.log('velocity:' + JSON.stringify(this.velocity));
+        // console.log("timeDelta:" + JSON.stringify(timeDelta));
         var newVelocity = {
-          'x': this.velocity.x + acceleration.x * timeDelta / 1000 / HARDCODED_FACTOR_LOL,
-          'y': this.velocity.y + acceleration.y * timeDelta / 1000 / HARDCODED_FACTOR_LOL,
-          'z': this.velocity.z + acceleration.z * timeDelta / 1000 / HARDCODED_FACTOR_LOL,
+          'x': this.velocity.x + acceleration.x * timeDelta / 1000,
+          'y': this.velocity.y + acceleration.y * timeDelta / 1000,
+          'z': this.velocity.z + acceleration.z * timeDelta / 1000,
         };
-
         // update position
         el.setAttribute('position', {
           x: position.x + this.velocity.x * timeDelta / 1000,
           y: position.y + this.velocity.y * timeDelta / 1000,
           z: position.z + this.velocity.z * timeDelta / 1000,
         });
-        console.log('new position: ' + JSON.stringify(el.getAttribute('position')));
-        // position.x += this.velocity.x * timeDelta;
-        // position.y += this.velocity.y * timeDelta;
-        // position.z += this.velocity.z * timeDelta;
+        console.log('newposition: ' + JSON.stringify(el.getAttribute('position')));
         // finally, update velocity state
         this.velocity = newVelocity;
-
-        // this.counter++;
       }
     });
   </script>
@@ -119,10 +109,11 @@
 
     <a-sphere id="mercury" position="0 0 6" radius=".4" rotation="0 180 0" src="#mercury-texture"></a-sphere>
     <a-sphere id="venus" position="0 0 8.5" radius=".4" src="#venus-texture"></a-sphere>
-    <a-entity id="earth-and-moon" position="0 0 10.5" moving-earth>
+    <a-entity id="earth-and-moon" position="0 0 14.7" moving-earth>
       <a-sphere position="0 0 0" radius="0.5" color="#6DCBE7" id="earth" src="#earth-texture"> </a-sphere>
       <a-sphere position="-1 0 0" radius=".10" color="#DBE0DE" id="moon" src="#moon-texture"></a-sphere>
     </a-entity>
+    <a-sphere id="earth-at-perihelion" position = "0 0 -15.2" radius="0.5"></a-sphere>
     <a-sphere id="mars" position="0 0 12.5" radius=".4" src="#mars-texture"></a-sphere>
     <a-sphere id="jupiter" position="0 0 24" radius="2.5" src="#jupiter-texture"></a-sphere>
 

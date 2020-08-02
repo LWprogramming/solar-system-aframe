@@ -34,17 +34,14 @@
         this.counter = 0;
       },
       tick: function(time, timeDelta) {
-        // TODO THIS IS BROKEN AND IDK WHY
-        // probably something obvious but i'm not familiar with aframe
-        // 
-        while (this.counter < 3) {
-          console.log(this.velocity);
-          this.counter++;
-          if (this.counter >= 3) {
-            return;
-          }
+        if (this.counter >= 3) {
+          return;
         }
+        console.log('counter' + this.counter);
+        
+        console.log("velocity:" + JSON.stringify(this.velocity));
         var SUN_MASS = 1.989 * Math.pow(10, 6); // 1.989e30 kg
+        var HARDCODED_FACTOR_LOL = 10000; // what???
         // TODO: this is hardcoded assuming center of sun is at the origin.
         var el = this.el;
         var position = el.getAttribute("position");
@@ -56,17 +53,28 @@
         }; // have to reverse vector because we want earth to sun not sun to earth
         var accelerationMagnitude = SUN_MASS / Math.pow(getVectorMagnitude(earthToSunVector), 2);
         var acceleration = scaleVector(earthToSunVector, accelerationMagnitude);
+        console.log("acceleration:" + JSON.stringify(acceleration));
+        console.log("timeDelta:" + JSON.stringify(timeDelta));
         var newVelocity = {
-          'x': this.velocity.x + acceleration.x * timeDelta,
-          'y': this.velocity.y + acceleration.y * timeDelta,
-          'z': this.velocity.z + acceleration.z * timeDelta,
+          'x': this.velocity.x + acceleration.x * timeDelta / 1000 / HARDCODED_FACTOR_LOL,
+          'y': this.velocity.y + acceleration.y * timeDelta / 1000 / HARDCODED_FACTOR_LOL,
+          'z': this.velocity.z + acceleration.z * timeDelta / 1000 / HARDCODED_FACTOR_LOL,
         };
+
         // update position
-        position.x += this.velocity.x * timeDelta;
-        position.y += this.velocity.y * timeDelta;
-        position.z += this.velocity.z * timeDelta;
+        el.setAttribute('position', {
+          x: position.x + this.velocity.x * timeDelta / 1000,
+          y: position.y + this.velocity.y * timeDelta / 1000,
+          z: position.z + this.velocity.z * timeDelta / 1000,
+        });
+        console.log('new position: ' + JSON.stringify(el.getAttribute('position')));
+        // position.x += this.velocity.x * timeDelta;
+        // position.y += this.velocity.y * timeDelta;
+        // position.z += this.velocity.z * timeDelta;
         // finally, update velocity state
         this.velocity = newVelocity;
+
+        // this.counter++;
       }
     });
   </script>
@@ -111,8 +119,8 @@
 
     <a-sphere id="mercury" position="0 0 6" radius=".4" rotation="0 180 0" src="#mercury-texture"></a-sphere>
     <a-sphere id="venus" position="0 0 8.5" radius=".4" src="#venus-texture"></a-sphere>
-    <a-entity id="earth-and-moon" position="0 0 10.5">
-      <a-sphere position="0 0 0" radius="2" color="#6DCBE7" id="earth" src="#earth-texture" moving-earth> </a-sphere>
+    <a-entity id="earth-and-moon" position="0 0 10.5" moving-earth>
+      <a-sphere position="0 0 0" radius="0.5" color="#6DCBE7" id="earth" src="#earth-texture"> </a-sphere>
       <a-sphere position="-1 0 0" radius=".10" color="#DBE0DE" id="moon" src="#moon-texture"></a-sphere>
     </a-entity>
     <a-sphere id="mars" position="0 0 12.5" radius=".4" src="#mars-texture"></a-sphere>
